@@ -17,7 +17,7 @@ def time_difference(start_time_str, end_time_str):
     return decimal_hours
 
 # Example usage
-start_time = "8:00 AM"
-end_time = "4:30 PM"
+start_time = "8:30 AM"
+end_time = "4:00 PM"
 difference = time_difference(start_time, end_time)
 print(f"Hours: {difference:.2f}\nBreak Adjusted: {difference-1:.2f}")

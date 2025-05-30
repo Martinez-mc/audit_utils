@@ -1,10 +1,14 @@
 import sys
-import pandas as pd
-import numpy_financial as npf
-from Amortization import amortize, compounder
-from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, 
-QTextEdit, QLineEdit, QLabel, QPushButton, QGroupBox, QComboBox, QMessageBox, QRadioButton)
+import seaborn as sns
+import matplotlib.pyplot as plt
 from datetime import datetime
+from PyQt6.QtGui import QPixmap
+from PyQt6.QtCore import Qt
+from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, 
+QTextEdit, QLineEdit, QLabel, QPushButton, QGroupBox, QComboBox, QMessageBox, QRadioButton, 
+QScrollArea)
+
+from Amortization import amortize, compounder
 
 class Amortization(QMainWindow):
     def __init__(self):
@@ -20,11 +24,10 @@ class Amortization(QMainWindow):
         self.container = QVBoxLayout()
         self.upper_layout = QHBoxLayout()
 
-
         # Input Zone
         # -----------------------------------------------------
         self.group_box = QGroupBox("Input Zone")
-        self.group_box.setFixedWidth(200)
+        self.group_box.setFixedWidth(250)
 
         # Radio Box
         self.radio_box = QGroupBox("Annuity")
@@ -100,7 +103,7 @@ class Amortization(QMainWindow):
         self.buttons_group_box = QGroupBox("Actions")
         self.button_layout = QVBoxLayout()
         self.amortization_btn = QPushButton('Amortize')
-        self.amortization_btn.clicked.connect(self.set_results)
+        self.amortization_btn.clicked.connect(self.set_table)
         self.clear_btn = QPushButton('Clear')
         self.clear_btn.clicked.connect(self.clear)
         self.button_layout.addWidget(self.amortization_btn)
@@ -110,14 +113,20 @@ class Amortization(QMainWindow):
         self.group_box.setLayout(self.variables_layout)
 
         self.display_group_box = QGroupBox('Display')
+        self.display_label = QLabel("")
+        self.display_layout = QHBoxLayout()
+        self.display_layout.addWidget(self.display_label)
+        self.display_group_box.setLayout(self.display_layout)
 
         # Results Section
         # ------------------------------------------------
         self.results_group_box = QGroupBox("Results")
+        self.results_group_box.setFixedHeight(400)
         self.results_layout = QHBoxLayout()
         self.results_txt = QTextEdit()
         self.results_txt.setReadOnly(True)
-        #self.results_txt.setFixedHeight(200)
+        self.results_txt.setFixedHeight(300)
+        #self.results_txt.setFixedWidth()
         self.results_layout.addWidget(self.results_txt)
         self.results_group_box.setLayout(self.results_layout)
 
@@ -134,10 +143,10 @@ class Amortization(QMainWindow):
         self.container.addWidget(self.buttons_group_box)
 
         self.upper_layout.addLayout(self.container)
-        self.upper_layout.addWidget(self.display_group_box)
+        self.upper_layout.addWidget(self.results_group_box)
 
         self.main_layout.addLayout(self.upper_layout)
-        self.main_layout.addWidget(self.results_group_box)
+        self.main_layout.addWidget(self.display_group_box)
         
         #ENDS QT Application
         # -----------------------------------------------------
@@ -191,7 +200,7 @@ class Amortization(QMainWindow):
             years = days / 365.25
             self.periods_value.setText(str(f'{years:.0f}'))
     
-    def set_results(self):
+    def set_table(self):
         
         start = self.start_date_value.text()
         periods = int(self.periods_value.text())
@@ -223,15 +232,41 @@ class Amortization(QMainWindow):
         """
 
         # Combine the CSS styles with the HTML content
-        full_html_content = css_styles + amortization_table
+        full_html_content = css_styles + amortization_table[1]
         self.results_txt.setHtml(full_html_content)
+    
+        def set_chart(amt):
+
+            sns.set(style="whitegrid")
+            plt.figure(figsize=(9, 4.5))
+            sns.barplot(data=amt, x='Date', y='Balance', palette='Blues')
+            plt.title('Amortized Balance', fontsize=20, fontweight='bold')
+            plt.xlabel('Date', fontsize=14)
+            plt.ylabel('Balance', fontsize=14)
+            plt.xticks([])
+            plt.grid(axis='y')
+            plt.tight_layout()
+            #plt.show()
+            plt.savefig('plot.png', format='png')
+            plt.close()
+
+            pixmap = QPixmap('plot.png')
+            self.display_label.setPixmap(pixmap)
+
+
+        set_chart(amortization_table[0])
+        print(amortization_table[0])
         
+
     def clear(self):
         self.results_txt.setText('')
 
     def recompute(self):
-        self.get_periods()
-        self.get_payment()
+        try:
+            self.get_periods()
+            self.get_payment()
+        except:
+            pass
 
 if __name__ == '__main__': 
     app = QApplication(sys.argv)

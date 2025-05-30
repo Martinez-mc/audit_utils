@@ -2,7 +2,7 @@
 
 # Import libraries as needed
 import xlwings as xw
-from xlwings import constants
+from xlwings import constants, Range
 from datetime import datetime
 import pandas as pd
 import pyperclip
@@ -12,6 +12,38 @@ import pyperclip
 app = xw.apps.active
 wb = app.books.active
 sht = wb.sheets.active
+
+rng = Range("W8:W4736")
+
+for cell in rng:
+    if cell.offset(column_offset=-4).value > 365:
+        if cell.offset(column_offset=-2).value > 0 or cell.offset(column_offset=-2).value < 0:
+            cell.value = 0
+            print(cell.address)
+        elif cell.offset(column_offset=-1).value > 0 or cell.offset(column_offset=-1).value < 0:
+            cell.value = 0
+            print(cell.address)
+
+    else:
+        cell.value = cell.offset(column_offset=-3).value
+        print(cell.address)
+
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 # Snippets
 """

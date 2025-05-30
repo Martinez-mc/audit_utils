@@ -4,7 +4,7 @@ import pandas as pd
 import numpy_financial as npf
 
 def compounder(start, periods, comp, rate, ann, principal):
-    """Returns compounded rate and frequency"""
+    """Returns compounded rate, frequency and payment"""
 
     frequency = ''
     compounded_rate = 0.00
@@ -21,7 +21,7 @@ def compounder(start, periods, comp, rate, ann, principal):
             compounded_rate = rate / 52
     elif comp == 'Monthly':
         if ann == 'Ordinary':
-            frequency = 'M'
+            frequency = 'ME'
         else:
             frequency = 'MS'
         compounded_rate = rate / 12
@@ -29,7 +29,7 @@ def compounder(start, periods, comp, rate, ann, principal):
         compounded_rate = rate / 2
     elif comp == 'Annual':
         if ann == 'Ordinary':
-            frequency = 'Y'
+            frequency = 'YE'
         else:
             frequency = 'YS'
         compounded_rate = rate / 1
@@ -41,14 +41,13 @@ def compounder(start, periods, comp, rate, ann, principal):
     return [dates, compounded_rate, payment]
     
 def amortize(start, periods, comp, rate, ann, pmt, principal):
-
+    """Returns Amortization Table in HTML format"""
     dates_rates_payment = compounder(start, periods, comp, rate, ann, principal)
 
     # Populate Payment Column
     pmt_list = [0]
     for x in range(0, periods):
         pmt_list.append(dates_rates_payment[2])
-
 
     # Define the data structure
     data = {
@@ -83,44 +82,4 @@ def amortize(start, periods, comp, rate, ann, pmt, principal):
     })
 
     html = formatted_df.to_html(index=False)
-    return html
-
-    """
-
-start = '1/1/2024'
-periods = 5
-comp = 'Annual'
-rate = .09
-ann = 'Ordinary'
-pmt = 1285
-principal = 5000
-
-print(amortize(start, periods, comp, rate, ann, pmt, principal))    
-"""
-
-"""
-        pmt_list = []
-        for x in range(0, periods):
-            pmt_list.append(payment)
-
-        dates = pd.date_range(start=self.start_date_value, end=self.end_date_value)
-
-        data = {
-            'Date': dates,
-            'Payment': pmt_list,
-            'Interest':[0],
-            'Principal':[0],
-            'Balance':[principal]
-        }
-
-                
-        for t in range(0, periods):
-            interest = data['Balance'][-1] * compounded_rate
-            principal = payment - interest
-
-            data['Interest'].append(interest)
-            data['Principal'].append(principal)
-            data['Balance'].append(data['Balance'][-1] - principal)
-
-        print(data)
-"""
+    return [df, html]
