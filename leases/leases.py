@@ -48,8 +48,7 @@ def present_value_test(cat, rate, residual, fair_value, terms, pmts):
     if cat == 'Ordinary':
         pv_factor = pv_factor_annuity('Ordinary', rate, terms)
         pv_of_pmts = pmts * pv_factor
-        pv_of_residual = residual * 0.00
-
+        pv_of_residual = residual * pv_factor_lumpsum(rate, terms)
         if pv_of_pmts + pv_of_residual > (fair_value * .90):
             return True
         else: 
